@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>『Try VII』Official Site</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Sans+JP:wght@300;400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── RESET ── */
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Noto Sans JP',sans-serif;
+  background:#fff;color:#1a1a1a;
+  overflow-x:hidden;
+}
+a{text-decoration:none;color:inherit;}
+img{display:block;max-width:100%;}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-thumb{background:#aaddf5;border-radius:9px;}
+
+/* ── NAV ── */
+#nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  height:56px;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .4s, box-shadow .4s;
+}
+#nav.on{
+  background:rgba(255,255,255,.95);
+  backdrop-filter:blur(16px);
+  box-shadow:0 1px 0 rgba(170,221,245,.25);
+}
+.nav-links{
+  display:flex;align-items:center;gap:2.8rem;
+  list-style:none;
+}
+.nav-links a{
+  font-family:'Outfit',sans-serif;
+  font-size:.62rem;font-weight:600;
+  letter-spacing:.22em;text-transform:uppercase;
+  color:rgba(255,255,255,.85);
+  transition:color .3s,opacity .3s;
+  position:relative;
+}
+.nav-links a::after{
+  content:'';position:absolute;
+  left:50%;bottom:-4px;transform:translateX(-50%);
+  width:0;height:1.5px;border-radius:9px;
+  background:linear-gradient(90deg,#5fc8ec,#f9b4cb);
+  transition:width .28s;
+}
+.nav-links a:hover::after{width:100%;}
+#nav.on .nav-links a{color:#333;}
+#nav.on .nav-links a:hover{color:#2ba6d0;}
+
+/* ── HERO ── */
+#hero{
+  position:relative;
+  height:100svh;
+  overflow:hidden;
+}
+.hero-img{
+  width:100%;height:100%;
+  object-fit:cover;object-position:center top;
+}
+/* very subtle vignette only at bottom */
+.hero-vignette{
+  position:absolute;inset:0;
+  background:linear-gradient(to bottom, transparent 60%, rgba(0,0,0,.28) 100%);
+  pointer-events:none;
+}
+/* scroll cue */
+.hero-scroll{
+  position:absolute;bottom:1.8rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:.4rem;
+  color:rgba(255,255,255,.5);
+  font-family:'Outfit',sans-serif;font-size:.5rem;letter-spacing:.22em;
+  pointer-events:none;
+}
+.scroll-bar{
+  width:1px;height:36px;
+  background:linear-gradient(to bottom,rgba(255,255,255,.6),transparent);
+  animation:sBar 2s ease-in-out infinite;
+}
+@keyframes sBar{0%,100%{opacity:.4;transform:scaleY(.6);}50%{opacity:1;transform:scaleY(1);}}
+
+/* ── SECTION BASE ── */
+.s{padding:7rem 0;}
+.s-inner{max-width:1160px;margin:0 auto;padding:0 2.5rem;}
+.s-head{text-align:center;margin-bottom:4rem;}
+.s-en{
+  display:block;
+  font-family:'Cormorant',serif;font-style:italic;font-weight:300;
+  font-size:clamp(2.8rem,5vw,4.2rem);line-height:1;
+  background:linear-gradient(135deg,#5fc8ec 0%,#f9b4cb 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;margin-bottom:.3rem;
+}
+.s-ja{
+  display:block;
+  font-size:.68rem;font-weight:400;letter-spacing:.28em;color:#bbb;
+}
+.s-bar{
+  display:inline-block;margin-top:1rem;
+  width:28px;height:2px;border-radius:9px;
+  background:linear-gradient(90deg,#5fc8ec,#f9b4cb);
+}
+
+/* ── MEMBERS ── */
+#members{background:#fafbfc;}
+.m-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:2rem;
+}
+
+/* ─ MEMBER CARD ─ */
+.mc{
+  border-radius:16px;
+  overflow:hidden;
+  background:#fff;
+  border:1px solid rgba(0,0,0,.05);
+  transition:transform .35s cubic-bezier(.2,0,.1,1), box-shadow .35s;
+  cursor:pointer;
+}
+.mc:hover{
+  transform:translateY(-8px);
+  box-shadow:0 20px 50px rgba(95,200,236,.15);
+}
+
+/* photo flip zone */
+.mc-photo-wrap{
+  position:relative;
+  aspect-ratio:3/4;
+  overflow:hidden;
+  background:linear-gradient(135deg,var(--ph1,#d8f3fc),var(--ph2,#fce4ec));
+}
+/* both images stacked */
+.mc-photo-wrap .ph{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  object-fit:cover;
+  transition:opacity .55s cubic-bezier(.4,0,.2,1);
+}
+.mc-photo-wrap .ph1{opacity:1;z-index:1;}
+.mc-photo-wrap .ph2{opacity:0;z-index:2;}
+/* show second on hover (desktop) or when .flipped (tap/mobile) */
+.mc:hover .ph2,
+.mc.flipped .ph2{opacity:1;}
+.mc:hover .ph1,
+.mc.flipped .ph1{opacity:0;}
+
+/* placeholder when no image */
+.ph-placeholder{
+  position:absolute;inset:0;z-index:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:.5rem;color:rgba(255,255,255,.6);
+}
+.ph-placeholder svg{width:40px;height:40px;fill:rgba(255,255,255,.5);}
+.ph-placeholder span{
+  font-family:'Outfit',sans-serif;font-size:.6rem;letter-spacing:.15em;
+  font-weight:600;text-transform:uppercase;
+}
+/* color strip at top */
+.mc-stripe{height:4px;background:var(--mc,#5fc8ec);position:relative;z-index:3;}
+
+/* tap hint badge (mobile) */
+.tap-hint{
+  position:absolute;bottom:.7rem;right:.7rem;z-index:10;
+  background:rgba(0,0,0,.35);backdrop-filter:blur(4px);
+  color:#fff;border-radius:99px;
+  font-family:'Outfit',sans-serif;font-size:.55rem;font-weight:600;
+  padding:.2rem .65rem;letter-spacing:.08em;
+  pointer-events:none;
+  transition:opacity .3s;
+}
+@media(hover:hover){.tap-hint{display:none;}}
+
+/* info below photo */
+.mc-info{
+  padding:1.3rem 1.5rem 1.5rem;
+}
+.mc-name{
+  font-weight:700;font-size:1.08rem;color:#1a1a1a;
+  display:flex;align-items:center;gap:.5rem;
+  margin-bottom:.15rem;
+}
+.mc-dot{
+  width:9px;height:9px;border-radius:50%;
+  background:var(--mc,#5fc8ec);flex-shrink:0;
+}
+.mc-kana{
+  font-family:'Outfit',sans-serif;font-size:.63rem;
+  font-weight:500;letter-spacing:.1em;color:#bbb;
+  margin-bottom:.9rem;
+}
+.mc-color-tag{
+  display:inline-flex;align-items:center;gap:.35rem;
+  font-size:.6rem;font-weight:700;letter-spacing:.1em;
+  padding:.18rem .75rem;border-radius:99px;
+  background:color-mix(in srgb,var(--mc,#5fc8ec) 12%,white);
+  color:color-mix(in srgb,var(--mc,#5fc8ec) 55%,#222);
+  margin-bottom:.9rem;
+}
+.mc-sns{display:flex;gap:.4rem;flex-wrap:wrap;}
+.mc-sns-link{
+  display:inline-flex;align-items:center;gap:.3rem;
+  font-family:'Outfit',sans-serif;
+  font-size:.6rem;font-weight:600;letter-spacing:.04em;
+  padding:.24rem .7rem;border-radius:99px;
+  background:#f0faff;border:1px solid #dff2fb;color:#2ba6d0;
+  transition:background .2s;text-decoration:none;
+}
+.mc-sns-link:hover{background:#dff2fb;}
+.mc-sns-link svg{width:10px;height:10px;fill:#2ba6d0;flex-shrink:0;}
+
+
+
+/* ── MUSIC ── */
+#music{background:#fafbfc;}
+.mi-list{
+  max-width:680px;margin:0 auto;
+  display:flex;flex-direction:column;gap:.85rem;
+}
+.mi{
+  display:grid;
+  grid-template-columns:52px 1fr auto;
+  align-items:center;gap:1.2rem;
+  padding:1.2rem 1.5rem;
+  background:#fff;
+  border:1px solid #edf6fb;
+  border-radius:14px;
+  box-shadow:0 2px 12px rgba(95,200,236,.08);
+  transition:transform .22s,box-shadow .22s;
+  text-decoration:none;color:inherit;
+  position:relative;overflow:hidden;
+}
+.mi::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;
+  width:3px;
+  background:linear-gradient(to bottom,#5fc8ec,#f9b4cb);
+  border-radius:0 3px 3px 0;
+}
+.mi:hover{transform:translateX(5px);box-shadow:0 4px 24px rgba(95,200,236,.18);}
+.mi-num{
+  font-family:'Cormorant',serif;font-style:italic;font-weight:300;
+  font-size:2rem;color:#c8eaf7;line-height:1;text-align:center;
+}
+.mi-title{font-weight:700;font-size:1rem;color:#1a1a1a;}
+.mi-badge{
+  font-family:'Outfit',sans-serif;
+  font-size:.58rem;font-weight:700;letter-spacing:.1em;
+  padding:.2rem .75rem;border-radius:99px;white-space:nowrap;flex-shrink:0;
+}
+.badge-mv{background:#5fc8ec;color:#fff;}
+.badge-new{background:#f9b4cb;color:#fff;}
+.mi-play{
+  width:36px;height:36px;border-radius:50%;
+  background:#edf8fd;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.78rem;color:#5fc8ec;flex-shrink:0;
+  transition:background .2s,color .2s;
+}
+.mi:hover .mi-play{background:#5fc8ec;color:#fff;}
+/* custom audio player */
+.mi-play-btn{
+  width:40px;height:40px;border-radius:50%;
+  background:linear-gradient(135deg,#eaf7fd,#fde8f2);
+  border:1.5px solid #dff2fb;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;
+  transition:background .2s,transform .15s,box-shadow .2s;
+  padding:0;
+}
+.mi-play-btn:hover{
+  background:linear-gradient(135deg,#5fc8ec,#f9b4cb);
+  border-color:transparent;
+  transform:scale(1.08);
+  box-shadow:0 4px 14px rgba(95,200,236,.35);
+}
+.mi-play-btn svg{width:14px;height:14px;fill:#5fc8ec;transition:fill .2s;}
+.mi-play-btn:hover svg{fill:#fff;}
+.mi-play-btn.playing{
+  background:linear-gradient(135deg,#5fc8ec,#f9b4cb);
+  border-color:transparent;
+  box-shadow:0 4px 14px rgba(95,200,236,.35);
+}
+.mi-play-btn.playing svg{fill:#fff;}
+.mi-progress-wrap{
+  max-width:680px;margin:-.45rem auto .5rem;
+  height:3px;background:#edf6fb;
+  border-radius:0 0 14px 14px;
+  overflow:hidden;
+  border:1px solid #edf6fb;border-top:none;
+  opacity:0;transition:opacity .3s;
+}
+.mi-progress-wrap.active{opacity:1;}
+.mi-progress-bar{
+  height:100%;width:0%;
+  background:linear-gradient(90deg,#5fc8ec,#f9b4cb);
+  border-radius:0 0 14px 14px;
+  transition:width .5s linear;
+}
+.music-cta{text-align:center;margin-top:2rem;}
+
+/* ── TICKET ── */
+#ticket{background:#fff;}
+.tk-single{
+  max-width:560px;margin:0 auto;
+  border-radius:20px;overflow:hidden;
+  border:1px solid #edf6fb;
+  box-shadow:0 2px 20px rgba(95,200,236,.1);
+}
+.tk-single-head{
+  background:linear-gradient(135deg,#eaf7fd 0%,#fde8f2 100%);
+  padding:1.8rem 2rem 1.6rem;
+  text-align:center;
+}
+.tk-single-title{
+  font-weight:700;font-size:1.1rem;color:#1a1a1a;margin-bottom:.3rem;
+}
+.tk-single-sub{
+  font-family:'Outfit',sans-serif;
+  font-size:.72rem;color:#aaa;letter-spacing:.04em;
+}
+.tk-single-body{
+  background:#fff;
+  padding:1.4rem 1.6rem;
+  display:flex;flex-direction:column;gap:.8rem;
+}
+.tk-link{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1rem 1.4rem;border-radius:12px;
+  font-weight:700;font-size:.9rem;
+  transition:transform .18s,box-shadow .18s;
+  text-decoration:none;
+}
+.tk-link:hover{transform:translateX(4px);}
+.tk-link-blue{
+  background:#edf8fd;color:#2ba6d0;
+  border:1.5px solid #c8eaf7;
+}
+.tk-link-blue:hover{background:#d8f1fb;border-color:#aaddf5;}
+.tk-link-pink{
+  background:#fdf0f5;color:#d4608a;
+  border:1.5px solid #f5d0e0;
+}
+.tk-link-pink:hover{background:#fce4ee;border-color:#f0b8cc;}
+.tk-link-label{font-size:.9rem;}
+.tk-link-arrow{font-size:1rem;opacity:.6;}
+
+/* ── SCHEDULE ── */
+#schedule{background:#fafbfc;}
+.sc-embed{
+  max-width:860px;margin:0 auto;
+}
+.sc-iframe-wrap{
+  border-radius:16px;
+  overflow:hidden;
+  border:1px solid #e8f4fb;
+  box-shadow:0 4px 24px rgba(95,200,236,.12);
+  background:#fff;
+  /* Responsive height */
+  position:relative;
+  width:100%;
+}
+.sc-iframe-wrap iframe{
+  display:block;
+  width:100%;
+  height:600px;
+  border:none;
+}
+.sc-link-row{
+  text-align:center;
+  margin-top:1.4rem;
+}
+@media(max-width:600px){
+  .sc-iframe-wrap iframe{height:480px;}
+}
+
+/* ── SHOP ── */
+#shop{background:#fff;}
+.shop-box{
+  max-width:700px;margin:0 auto;
+  border:1px solid #f0f4f8;border-radius:20px;
+  overflow:hidden;
+}
+.shop-banner-link{display:block;line-height:0;}
+.shop-banner{
+  width:100%;height:auto;
+  display:block;
+  transition:opacity .2s;
+}
+.shop-banner-link:hover .shop-banner{opacity:.92;}
+.shop-inner{
+  padding:1.8rem 2rem 2.2rem;
+  text-align:center;
+  background:#fff;
+}
+.shop-desc{font-size:.84rem;color:#666;line-height:1.8;margin-bottom:1.4rem;}
+.chips{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.6rem;}
+.chip{
+  font-family:'Outfit',sans-serif;font-size:.63rem;font-weight:600;
+  padding:.26rem .95rem;border-radius:99px;
+  background:rgba(95,200,236,.1);border:1px solid rgba(95,200,236,.2);
+  color:#2ba6d0;
+}
+
+/* ── BUTTONS ── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.45rem;
+  padding:.7rem 1.8rem;border-radius:999px;
+  font-family:'Outfit',sans-serif;font-weight:600;font-size:.8rem;letter-spacing:.05em;
+  border:none;cursor:pointer;transition:transform .18s,box-shadow .18s;
+  white-space:nowrap;
+}
+.btn:hover{transform:translateY(-2px);}
+.btn-blue{
+  background:linear-gradient(135deg,#5fc8ec,#2ba6d0);color:#fff;
+  box-shadow:0 4px 18px rgba(95,200,236,.4);
+}
+.btn-blue:hover{box-shadow:0 8px 26px rgba(95,200,236,.55);}
+.btn-pink{
+  background:linear-gradient(135deg,#f9b4cb,#f07aa8);color:#fff;
+  box-shadow:0 4px 18px rgba(249,180,203,.45);
+}
+.btn-pink:hover{box-shadow:0 8px 26px rgba(249,180,203,.65);}
+.btn-outline{
+  background:transparent;color:#2ba6d0;
+  border:1.5px solid #aaddf5;
+}
+.btn-outline:hover{background:#edf8fd;}
+
+/* ── FOOTER ── */
+footer{
+  background:#111;padding:2.8rem 2rem;text-align:center;
+}
+.footer-logo{
+  width:80px;height:80px;
+  object-fit:contain;
+  margin:0 auto 1rem;
+  opacity:.75;
+  border-radius:12px;
+}
+.footer-sns{
+  display:flex;align-items:center;justify-content:center;
+  gap:1.6rem;margin-bottom:1.5rem;
+}
+.footer-sns-link{
+  display:flex;align-items:center;justify-content:center;
+  width:40px;height:40px;border-radius:50%;
+  color:rgba(255,255,255,.4);
+  transition:color .2s,background .2s;
+}
+.footer-sns-link:hover{
+  color:rgba(255,255,255,.9);
+  background:rgba(255,255,255,.08);
+}
+.footer-sns-link svg{width:18px;height:18px;}
+footer small{
+  font-family:'Outfit',sans-serif;
+  font-size:.58rem;letter-spacing:.15em;color:rgba(255,255,255,.18);
+}
+
+/* ── REVEAL ── */
+.rv{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease;}
+.rv.in{opacity:1;transform:translateY(0);}
+.d1{transition-delay:.08s;}.d2{transition-delay:.16s;}.d3{transition-delay:.24s;}
+.d4{transition-delay:.32s;}.d5{transition-delay:.4s;}.d6{transition-delay:.48s;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:860px){
+  .m-grid{grid-template-columns:repeat(2,1fr);gap:1.2rem;}
+  .sns-row{grid-template-columns:repeat(2,1fr);}
+  .s-inner{padding:0 1.4rem;}
+}
+@media(max-width:540px){
+  .m-grid{grid-template-columns:repeat(2,1fr);gap:.8rem;}
+  .tk-grid{grid-template-columns:1fr;}
+  .s{padding:5rem 0;}
+  .nav-links{gap:1.4rem;}
+  .nav-links a{font-size:.55rem;}
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav id="nav">
+  <ul class="nav-links">
+    <li><a href="#members">Member</a></li>
+    <li><a href="#music">Music</a></li>
+    <li><a href="#ticket">Ticket</a></li>
+    <li><a href="#schedule">Schedule</a></li>
+    <li><a href="#shop">Shop</a></li>
+  </ul>
+</nav>
+
+<!-- ── HERO / KV ── -->
+<section id="hero">
+  <img src="img/kv.jpg" alt="Try VII KV" class="hero-img">
+  <div class="hero-vignette"></div>
+  <div class="hero-scroll">
+    <div class="scroll-bar"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- ── MEMBERS ── -->
+<section id="members" class="s">
+  <div class="s-inner">
+    <div class="s-head rv">
+      <span class="s-en">Member</span>
+      <span class="s-ja">メンバー紹介</span>
+      <div class="s-bar"></div>
+    </div>
+    <div class="m-grid">
+
+      <!-- 佐々木梨華 / 赤 -->
+      <div class="mc rv d1" style="--mc:#e53935;--ph1:#ffcdd2;--ph2:#ef9a9a;" data-flipped="false">
+        <div class="mc-stripe"></div>
+        <div class="mc-photo-wrap">
+          <img class="ph ph1" src="img/rika1.jpg" alt="">
+          <img class="ph ph2" src="img/rika2.jpg" alt="">
+          <span class="tap-hint">TAP ✦</span>
+        </div>
+        <div class="mc-info">
+          <div class="mc-name"><span class="mc-dot"></span>佐々木 梨華</div>
+          <div class="mc-kana">Rika Sasaki</div>
+          <span class="mc-color-tag">● 赤</span>
+          <div class="mc-sns">
+            <a href="https://x.com/TryVII_Rika"  target="_blank" class="mc-sns-link"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.74l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>X</a>
+            <a href="https://www.instagram.com/_rikapresso_" target="_blank" class="mc-sns-link"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>Instagram</a>
+            <a href="https://www.tiktok.com/@a______y03" target="_blank" class="mc-sns-link"><svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.78a4.85 4.85 0 01-1.01-.09z"/></svg>TikTok</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 桜叶さら / 水色 -->
+      <div class="mc rv d2" style="--mc:#29b6f6;--ph1:#e1f5fe;--ph2:#b3e5fc;" data-flipped="false">
+        <div class="mc-stripe"></div>
+        <div class="mc-photo-wrap">
+          <img class="ph ph1" src="img/sara1.jpg" alt="">
+          <img class="ph ph2" src="img/sara2.jpg" alt="">
+          <span class="tap-hint">TAP ✦</span>
+        </div>
+        <div class="mc-info">
+          <div class="mc-name"><span class="mc-dot"></span>桜叶 さら</div>
+          <div class="mc-kana">Sara Ouka</div>
+          <span class="mc-color-tag">● 水色</span>
+          <div class="mc-sns">
+            <a href="https://x.com/TryVII_Sara"  target="_blank" class="mc-sns-link"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.74l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>X</a>
+            <a href="https://www.instagram.com/s024ra/" target="_blank" class="mc-sns-link"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>Instagram</a>
+            <a href="https://www.tiktok.com/@s024ra" target="_blank" class="mc-sns-link"><svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.78a4.85 4.85 0 01-1.01-.09z"/></svg>TikTok</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 楠つきみ / 白 -->
+      <div class="mc rv d3" style="--mc:#9e9e9e;--ph1:#f5f5f5;--ph2:#e0e0e0;" data-flipped="false">
+        <div class="mc-stripe"></div>
+        <div class="mc-photo-wrap">
+          <img class="ph ph1" src="img/tsuki1.jpg" alt="">
+          <img class="ph ph2" src="img/tsuki2.jpg" alt="">
+          <span class="tap-hint">TAP ✦</span>
+        </div>
+        <div class="mc-info">
+          <div class="mc-name"><span class="mc-dot" style="border:1px solid #ccc;background:#e0e0e0;"></span>楠 つきみ</div>
+          <div class="mc-kana">Tsukimi Kusunoki</div>
+          <span class="mc-color-tag">● 白</span>
+          <div class="mc-sns">
+            <a href="https://x.com/TryVII_Tsukimi"  target="_blank" class="mc-sns-link"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.74l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>X</a>
+            <a href="https://www.instagram.com/tama_connyapi" target="_blank" class="mc-sns-link"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>Instagram</a>
+            <a href="https://www.tiktok.com/@tamaconnyapi" target="_blank" class="mc-sns-link"><svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.78a4.85 4.85 0 01-1.01-.09z"/></svg>TikTok</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 古山菜々美 / ピンク -->
+      <div class="mc rv d4" style="--mc:#e91e8c;--ph1:#fce4ec;--ph2:#f8bbd0;" data-flipped="false">
+        <div class="mc-stripe"></div>
+        <div class="mc-photo-wrap">
+          <img class="ph ph1" src="img/nana1.jpg" alt="">
+          <img class="ph ph2" src="img/nana2.jpg" alt="">
+          <span class="tap-hint">TAP ✦</span>
+        </div>
+        <div class="mc-info">
+          <div class="mc-name"><span class="mc-dot"></span>古山 菜々美</div>
+          <div class="mc-kana">Nanami Furuyama</div>
+          <span class="mc-color-tag">● ピンク</span>
+          <div class="mc-sns">
+            <a href="https://x.com/TryVII_Nanami"  target="_blank" class="mc-sns-link"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.74l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>X</a>
+            <a href="https://www.instagram.com/nanacon.26" target="_blank" class="mc-sns-link"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>Instagram</a>
+            <a href="https://www.tiktok.com/@nanacon.26" target="_blank" class="mc-sns-link"><svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.78a4.85 4.85 0 01-1.01-.09z"/></svg>TikTok</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 星咲のんの / 黄 -->
+      <div class="mc rv d5" style="--mc:#e8c000;--ph1:#fffde7;--ph2:#fff9c4;" data-flipped="false">
+        <div class="mc-stripe"></div>
+        <div class="mc-photo-wrap" style="background:linear-gradient(135deg,#fffde7,#fff9c4);">
+          <img class="ph ph1" src="img/nonno1.jpg" alt="">
+          <img class="ph ph2" src="img/nonno2.jpg" alt="">
+          <span class="tap-hint">TAP ✦</span>
+        </div>
+        <div class="mc-info">
+          <div class="mc-name"><span class="mc-dot"></span>星咲 のんの</div>
+          <div class="mc-kana">Nonno Hoshisaki</div>
+          <span class="mc-color-tag">● 黄色</span>
+          <div class="mc-sns">
+            <a href="https://x.com/TryVII_Nonno"  target="_blank" class="mc-sns-link"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.74l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>X</a>
+            <a href="https://www.instagram.com/ki_non8510" target="_blank" class="mc-sns-link"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>Instagram</a>
+            <a href="https://www.tiktok.com/@nonno.0701" target="_blank" class="mc-sns-link"><svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.78a4.85 4.85 0 01-1.01-.09z"/></svg>TikTok</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 成宮るる / 青 -->
+      <div class="mc rv d6" style="--mc:#1e88e5;--ph1:#e3f2fd;--ph2:#bbdefb;" data-flipped="false">
+        <div class="mc-stripe"></div>
+        <div class="mc-photo-wrap">
+          <img class="ph ph1" src="img/ruru1.jpg" alt="">
+          <img class="ph ph2" src="img/ruru2.jpg" alt="">
+          <span class="tap-hint">TAP ✦</span>
+        </div>
+        <div class="mc-info">
+          <div class="mc-name"><span class="mc-dot"></span>成宮 るる</div>
+          <div class="mc-kana">Ruru Narumiya</div>
+          <span class="mc-color-tag">● 青</span>
+          <div class="mc-sns">
+            <a href="https://x.com/TryVII_Ruru"  target="_blank" class="mc-sns-link"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.74l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>X</a>
+            <a href="https://www.instagram.com/n.r.m.y.r.r/" target="_blank" class="mc-sns-link"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>Instagram</a>
+            <a href="https://www.tiktok.com/@r.r.r.r.r.r.n" target="_blank" class="mc-sns-link"><svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.78a4.85 4.85 0 01-1.01-.09z"/></svg>TikTok</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+
+<!-- ── MUSIC ── -->
+<section id="music" class="s">
+  <div class="s-inner">
+    <div class="s-head rv">
+      <span class="s-en">Music</span>
+      <span class="s-ja">楽曲情報</span>
+      <div class="s-bar"></div>
+    </div>
+    <div class="mi-list">
+
+      <div class="mi rv" data-track="01">
+        <div class="mi-num">01</div>
+        <div class="mi-title">「初恋ファンタジー」</div>
+        <button class="mi-play-btn" onclick="togglePlay(this, 'audio01')" aria-label="再生">
+          <svg class="icon-play" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+          <svg class="icon-pause" viewBox="0 0 24 24" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        </button>
+        <audio id="audio01" src="audio/hatsukoifantasy.mp3" preload="none"></audio>
+      </div>
+      <div class="mi-progress-wrap" id="prog01">
+        <div class="mi-progress-bar" id="bar01"></div>
+      </div>
+
+      <div class="mi rv rv-d1" data-track="02">
+        <div class="mi-num">02</div>
+        <div class="mi-title">「セツナ」</div>
+        <button class="mi-play-btn" onclick="togglePlay(this, 'audio02')" aria-label="再生">
+          <svg class="icon-play" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+          <svg class="icon-pause" viewBox="0 0 24 24" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        </button>
+        <audio id="audio02" src="audio/setsuna.mp3" preload="none"></audio>
+      </div>
+      <div class="mi-progress-wrap" id="prog02">
+        <div class="mi-progress-bar" id="bar02"></div>
+      </div>
+
+      <div class="mi rv rv-d2" data-track="03">
+        <div class="mi-num">03</div>
+        <div class="mi-title">「青春のアクアブルー」</div>
+        <button class="mi-play-btn" onclick="togglePlay(this, 'audio03')" aria-label="再生">
+          <svg class="icon-play" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+          <svg class="icon-pause" viewBox="0 0 24 24" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        </button>
+        <audio id="audio03" src="audio/seishun.mp3" preload="none"></audio>
+      </div>
+      <div class="mi-progress-wrap" id="prog03">
+        <div class="mi-progress-bar" id="bar03"></div>
+      </div>
+
+    </div>
+    <div class="music-cta rv">
+      <a href="https://linkco.re/gFvNc8Bv" target="_blank" class="btn btn-outline">🎵 すべての楽曲を聴く</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── TICKET ── -->
+<section id="ticket" class="s">
+  <div class="s-inner">
+    <div class="s-head rv">
+      <span class="s-en">Ticket</span>
+      <span class="s-ja">チケット情報</span>
+      <div class="s-bar"></div>
+    </div>
+    <div class="tk-single rv">
+      <div class="tk-single-head">
+        <div class="tk-single-title">ライブチケット</div>
+        <div class="tk-single-sub">各プラットフォームにてご購入いただけます</div>
+      </div>
+      <div class="tk-single-body">
+        <a href="https://ticketdive.com/artist/cDXqIg5QOAH0XXcZhf8q" target="_blank" class="tk-link tk-link-blue">
+          <span class="tk-link-label">TicketDive</span>
+          <span class="tk-link-arrow">→</span>
+        </a>
+        <a href="https://livepocket.jp/event/search?performer=%E3%80%8ETryVII%E3%80%8F" target="_blank" class="tk-link tk-link-pink">
+          <span class="tk-link-label">LivePocket</span>
+          <span class="tk-link-arrow">→</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SCHEDULE ── -->
+<section id="schedule" class="s">
+  <div class="s-inner">
+    <div class="s-head rv">
+      <span class="s-en">Schedule</span>
+      <span class="s-ja">ライブスケジュール</span>
+      <div class="s-bar"></div>
+    </div>
+    <div class="sc-embed rv">
+      <div class="sc-iframe-wrap">
+        <iframe
+          src="https://timetreeapp.com/public_calendars/tryvii_official/embed"
+          width="100%"
+          height="600"
+          frameborder="0"
+          scrolling="no"
+          loading="lazy"
+          title="『Try VII』LIVEスケジュール"
+        ></iframe>
+      </div>
+      <div class="sc-link-row">
+        <a href="https://timetreeapp.com/public_calendars/tryvii_official" target="_blank" class="btn btn-outline">
+          TimeTreeアプリで見る →
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SHOP ── -->
+<section id="shop" class="s">
+  <div class="s-inner">
+    <div class="s-head rv">
+      <span class="s-en">Shop</span>
+      <span class="s-ja">オンライン物販</span>
+      <div class="s-bar"></div>
+    </div>
+    <div class="shop-box rv">
+      <a href="https://fanme.link/shop/@TryVII_official" target="_blank" class="shop-banner-link">
+        <img src="img/shop_banner.jpg" alt="Try VII SHOP" class="shop-banner">
+      </a>
+      <div class="shop-inner">
+        <div class="shop-desc">チェキ・グッズなどをオンラインでご購入いただけます。全国どこからでもご注文可能です。</div>
+        <div class="chips">
+          <span class="chip">📸 チェキ</span>
+          <span class="chip">🃏 トレカ</span>
+          <span class="chip">🏳️ タオル</span>
+          <span class="chip">👕 Tシャツ</span>
+        </div>
+        <a href="https://fanme.link/shop/@TryVII_official" target="_blank" class="btn btn-blue">🛒 ショップを見る</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <img src="img/logo.png" alt="Try VII" class="footer-logo">
+
+  <div class="footer-sns">
+    <a href="https://x.com/TryVII_official" target="_blank" class="footer-sns-link" aria-label="X">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.74l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+    </a>
+    <a href="https://www.instagram.com/tryvii_official/" target="_blank" class="footer-sns-link" aria-label="Instagram">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+    </a>
+    <a href="https://www.tiktok.com/@tryvii_official" target="_blank" class="footer-sns-link" aria-label="TikTok">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.78a4.85 4.85 0 01-1.01-.09z"/></svg>
+    </a>
+    <a href="https://www.youtube.com/channel/UC3VEiqjY1w0N6PQBZQFomRQ" target="_blank" class="footer-sns-link" aria-label="YouTube">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+    </a>
+  </div>
+
+  <small>© 2025 『Try VII』 All Rights Reserved.</small>
+</footer>
+<script>
+// ── Audio player
+let currentAudio = null;
+let currentBtn   = null;
+let progressTimer = null;
+
+function togglePlay(btn, audioId) {
+  const audio = document.getElementById(audioId);
+  const num = audioId.replace('audio','');
+  const progWrap = document.getElementById('prog' + num);
+  const bar      = document.getElementById('bar'  + num);
+  const playIcon  = btn.querySelector('.icon-play');
+  const pauseIcon = btn.querySelector('.icon-pause');
+
+  // Stop currently playing
+  if (currentAudio && currentAudio !== audio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    currentBtn.classList.remove('playing');
+    currentBtn.querySelector('.icon-play').style.display  = '';
+    currentBtn.querySelector('.icon-pause').style.display = 'none';
+    const prevNum = currentAudio.id.replace('audio','');
+    document.getElementById('prog'+prevNum).classList.remove('active');
+    document.getElementById('bar' +prevNum).style.width = '0%';
+    clearInterval(progressTimer);
+  }
+
+  if (audio.paused) {
+    audio.play();
+    btn.classList.add('playing');
+    playIcon.style.display  = 'none';
+    pauseIcon.style.display = '';
+    progWrap.classList.add('active');
+    currentAudio = audio;
+    currentBtn   = btn;
+    progressTimer = setInterval(() => {
+      if (audio.duration) {
+        bar.style.width = (audio.currentTime / audio.duration * 100) + '%';
+      }
+    }, 300);
+    audio.onended = () => {
+      btn.classList.remove('playing');
+      playIcon.style.display  = '';
+      pauseIcon.style.display = 'none';
+      bar.style.width = '0%';
+      progWrap.classList.remove('active');
+      clearInterval(progressTimer);
+      currentAudio = null; currentBtn = null;
+    };
+  } else {
+    audio.pause();
+    btn.classList.remove('playing');
+    playIcon.style.display  = '';
+    pauseIcon.style.display = 'none';
+    clearInterval(progressTimer);
+    currentAudio = null; currentBtn = null;
+  }
+}
+
+// Nav sticky
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => nav.classList.toggle('on', scrollY > 50), {passive:true});
+
+// Scroll reveal
+const obs = new IntersectionObserver(
+  es => es.forEach(e => { if(e.isIntersecting) e.target.classList.add('in'); }),
+  {threshold: .1}
+);
+document.querySelectorAll('.rv').forEach(el => obs.observe(el));
+
+// Member photo tap-to-flip
+document.querySelectorAll('.mc').forEach(card => {
+  card.addEventListener('click', e => {
+    if(e.target.closest('a')) return;
+    card.classList.toggle('flipped');
+  });
+});
+</script>
+
+</body>
+</html>
