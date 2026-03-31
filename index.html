@@ -64,6 +64,20 @@ img{display:block;max-width:100%;}
   width:100%;height:100%;
   object-fit:cover;object-position:center top;
 }
+@media(max-width:768px){
+  #hero{
+    height:auto;
+  }
+  .hero-img{
+    height:auto;
+    object-fit:contain;
+    object-position:center center;
+  }
+  .hero-vignette{
+    background:linear-gradient(to bottom, transparent 70%, rgba(0,0,0,.2) 100%);
+  }
+  .hero-scroll{display:none;}
+}
 /* very subtle vignette only at bottom */
 .hero-vignette{
   position:absolute;inset:0;
