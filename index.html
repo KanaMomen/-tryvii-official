@@ -24,12 +24,18 @@ img{display:block;max-width:100%;}
   position:fixed;top:0;left:0;right:0;z-index:200;
   height:56px;
   display:flex;align-items:center;justify-content:center;
-  transition:background .4s, box-shadow .4s;
+  transition:background .4s, box-shadow .4s, opacity .4s, transform .4s;
+  opacity:0;
+  transform:translateY(-8px);
+  pointer-events:none;
 }
 #nav.on{
   background:rgba(255,255,255,.95);
   backdrop-filter:blur(16px);
   box-shadow:0 1px 0 rgba(170,221,245,.25);
+  opacity:1;
+  transform:translateY(0);
+  pointer-events:auto;
 }
 .nav-links{
   display:flex;align-items:center;gap:2.8rem;
@@ -876,9 +882,13 @@ function togglePlay(btn, audioId) {
   }
 }
 
-// Nav sticky
+// Nav: ヒーロー通過後に表示
 const nav = document.getElementById('nav');
-window.addEventListener('scroll', () => nav.classList.toggle('on', scrollY > 50), {passive:true});
+const hero = document.getElementById('hero');
+window.addEventListener('scroll', () => {
+  const heroH = hero ? hero.offsetHeight : window.innerHeight;
+  nav.classList.toggle('on', scrollY > heroH * 0.6);
+}, {passive:true});
 
 // Scroll reveal
 const obs = new IntersectionObserver(
