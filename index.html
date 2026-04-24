@@ -675,12 +675,12 @@ footer small{
 
       <div class="mi rv" data-track="01">
         <div class="mi-num">01</div>
-        <div class="mi-title">「初恋ファンタジー」</div>
+        <div class="mi-title">「STARRY ROAD」</div>
         <button class="mi-play-btn" onclick="togglePlay(this, 'audio01')" aria-label="再生">
           <svg class="icon-play" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
           <svg class="icon-pause" viewBox="0 0 24 24" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
         </button>
-        <audio id="audio01" src="audio/hatsukoifantasy.mp3" preload="none"></audio>
+        <audio id="audio01" src="audio/starryroad.mp3" preload="metadata"></audio></audio>
       </div>
       <div class="mi-progress-wrap" id="prog01">
         <div class="mi-progress-bar" id="bar01"></div>
@@ -693,7 +693,7 @@ footer small{
           <svg class="icon-play" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
           <svg class="icon-pause" viewBox="0 0 24 24" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
         </button>
-        <audio id="audio02" src="audio/setsuna.mp3" preload="none"></audio>
+        <audio id="audio02" src="audio/setsuna.mp3" preload="metadata"></audio></audio>
       </div>
       <div class="mi-progress-wrap" id="prog02">
         <div class="mi-progress-bar" id="bar02"></div>
@@ -706,7 +706,7 @@ footer small{
           <svg class="icon-play" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
           <svg class="icon-pause" viewBox="0 0 24 24" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
         </button>
-        <audio id="audio03" src="audio/seishun.mp3" preload="none"></audio>
+        <audio id="audio03" src="audio/seishun.mp3" preload="metadata"></audio></audio>
       </div>
       <div class="mi-progress-wrap" id="prog03">
         <div class="mi-progress-bar" id="bar03"></div>
@@ -851,7 +851,10 @@ function togglePlay(btn, audioId) {
   }
 
   if (audio.paused) {
-    audio.play();
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {});
+    }
     btn.classList.add('playing');
     playIcon.style.display  = 'none';
     pauseIcon.style.display = '';
